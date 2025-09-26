@@ -64,6 +64,24 @@ app.put('/api/users/:id', (req, res) => {
 
   res.status(200).json(mockUsers[findUserIndex]);
 });
+app.patch('/api/users/:id',(req,res)=>{
+  const {body,
+    params: {id}} = req;
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)){
+    return response.status(400).send(
+      "User Not Found");
+    }
+    const findIndexUser= mockUsers.findIndex(u=>u.id===parsedId);
+    if (findIndexUser === -1){
+      return res.sendStatus(404);
+    }
+    mockUsers[findIndexUser] ={
+      ...mockUsers[findIndexUser], ...body}
+    return res.sendStatus(200).json(mockUsers[findIndexUser]);
+
+  }
+)
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
