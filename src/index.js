@@ -1,4 +1,4 @@
-import express, { request } from 'express';
+import express from 'express';
 const app = express();
 
 app.use(express.json());
@@ -13,56 +13,62 @@ const mockUsers = [
 
 // Root route
 app.get("/", (req, res) => {
-  res.status(201).send({ msg: "hello" });
+  res.status(200).json({ msg: "hello" });
 });
 
 // Get all users
 app.get('/api/users', (req, res) => {
-  res.send(mockUsers);
+  res.status(200).json(mockUsers);
 });
 
-app.post('/api/users',(req,res)=>{
-  console.log(req.body);
-  const {body} = req;
-  const newUser = {id: mockUsers.length +1, ...body};
+// Create a new user
+app.post('/api/users', (req, res) => {
+  const { body } = req;
+  const newUser = { id: mockUsers.length + 1, ...body };
   mockUsers.push(newUser);
-  return res.status(201).send(mockUsers);
-})
+  res.status(201).json(newUser);
+});
 
 // Get user by ID
 app.get('/api/users/:id', (req, res) => {
-  const ParsedId = parseInt(req.params.id);
+  const parsedId = parseInt(req.params.id);
 
-  if (isNaN(ParsedId)) {
-    return res.status(400).send("Invalid Id");
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: "Invalid Id" });
   }
 
-  const findUser = mockUsers.find((user) => user.id === ParsedId);
+  const findUser = mockUsers.find((user) => user.id === parsedId);
 
   if (!findUser) {
     return res.sendStatus(404);
   }
 
-  return res.send(findUser);
+  res.status(200).json(findUser);
 });
 
-app.put('/api/users/:id',(req,res)=>{
-  const {body,
-    params: {id},
-  } = req;
+// Update user by ID
+app.put('/api/users/:id', (req, res) => {
+  const { body, params: { id } } = req;
 
-  const ParsedId = parseInt(id);
-  if (isNaN(ParsedId)) {
-    return res.status(400).send('Invalid Id');
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: "Invalid Id" });
   }
+
+  const findUserIndex = mockUsers.findIndex(user => user.id === parsedId);
+  if (findUserIndex === -1) {
+    return res.sendStatus(404);
+  }
+
+  mockUsers[findUserIndex] = { id: parsedId, ...body };
+
+  res.status(200).json(mockUsers[findUserIndex]);
 });
-
-
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send({ error: 'Something went wrong!' });
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // Start the server
