@@ -81,7 +81,21 @@ app.patch('/api/users/:id',(req,res)=>{
     return res.sendStatus(200).json(mockUsers[findIndexUser]);
 
   }
-)
+);
+
+app.delete('/api/users/:id',(req,res)=>{
+  const {params : {id}} = req;
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)){
+    return res.status(400).json({error: "Invalid Id"});
+  }
+  const findUserIndex = mockUsers.findIndex(u=>u.id===parsedId);
+  if (findUserIndex === -1){
+    return res.sendStatus(404);
+  }
+  mockUsers.splice(findUserIndex,1);
+  return res.sendStatus(204);
+})
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
